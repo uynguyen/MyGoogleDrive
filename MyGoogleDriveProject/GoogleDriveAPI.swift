@@ -36,34 +36,27 @@ class GoogleDriveAPI {
     
     public func download(_ fileItem: GTLRDrive_File, onCompleted: @escaping (Data?, Error?) -> ()) {
         guard let fileID = fileItem.identifier else {
-            onCompleted(nil, nil)
-            return
+            return onCompleted(nil, nil)
         }
         
         self.service.executeQuery(GTLRDriveQuery_FilesGet.queryForMedia(withFileId: fileID)) { (ticket, file, error) in
             guard let data = (file as? GTLRDataObject)?.data else {
-                onCompleted(nil, nil)
-                return
+                return onCompleted(nil, nil)
             }
             
             onCompleted(data, nil)
         }
     }
     
-    private func upload(_ folderID: String, path: String, MIMEType: String, onCompleted: ((String?, Error?) -> ())?) {
-        guard let data = FileManager.default.contents(atPath: path) else {
-            onCompleted?(nil, NSError(domain: "GoogleDrive", code: 0, userInfo: ["message": "No data at path"]))
-            return
-        }
-        
+    private func upload(_ folderID: String, fileName: String, data: Data, MIMEType: String, onCompleted: ((String?, Error?) -> ())?) {
         let file = GTLRDrive_File()
-        file.name = path.components(separatedBy: "/").last
+        file.name = fileName
         file.parents = [folderID]
         
-        let uploadParams = GTLRUploadParameters.init(data: data, mimeType: MIMEType)
-        uploadParams.shouldUploadWithSingleRequest = true
+        let params = GTLRUploadParameters(data: data, mimeType: MIMEType)
+        params.shouldUploadWithSingleRequest = true
         
-        let query = GTLRDriveQuery_FilesCreate.query(withObject: file, uploadParameters: uploadParams)
+        let query = GTLRDriveQuery_FilesCreate.query(withObject: file, uploadParameters: params)
         query.fields = "id"
         
         self.service.executeQuery(query, completionHandler: { (ticket, file, error) in
@@ -73,8 +66,7 @@ class GoogleDriveAPI {
     
     public func delete(_ fileItem: GTLRDrive_File, onCompleted: @escaping ((Error?) -> ())) {
         guard let fileID = fileItem.identifier else {
-            onCompleted(nil)
-            return
+            return onCompleted(nil)
         }
         
         self.service.executeQuery(GTLRDriveQuery_FilesDelete.query(withFileId: fileID)) { (ticket, nilFile, error) in
