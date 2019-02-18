@@ -1,0 +1,6 @@
+framework module Pods_MyGoogleDriveProject {
+  umbrella header "Pods-MyGoogleDriveProject-umbrella.h"
+
+  export *
+  module * { export * }
+}

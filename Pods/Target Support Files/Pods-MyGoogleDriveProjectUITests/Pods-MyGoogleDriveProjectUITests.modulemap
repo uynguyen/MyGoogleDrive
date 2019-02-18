@@ -1,0 +1,6 @@
+framework module Pods_MyGoogleDriveProjectUITests {
+  umbrella header "Pods-MyGoogleDriveProjectUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
